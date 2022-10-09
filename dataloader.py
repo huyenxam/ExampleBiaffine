@@ -10,7 +10,7 @@ class InputSample(object):
         self.list_sample = []
         with open(path, 'r', encoding='utf8') as f:
             self.list_sample = json.load(f)
-        self.list_sample  = self.list_sample[:10]
+        # self.list_sample  = self.list_sample[:10]
 
     def get_character(self, word, max_char_len):
         word_seq = []
@@ -79,7 +79,7 @@ class MyDataSet(Dataset):
             self.char_vocab = json.load(f)
         self.label_2int = {w: i for i, w in enumerate(self.label_set)}
 
-    def preprocess(self, tokenizer, sentence, max_seq_length, mask_padding_with_zero=True):
+    def preprocess(self, tokenizer, context, question, max_seq_length, mask_padding_with_zero=True):
         firstSWindices = [0]
         input_ids = [tokenizer.cls_token_id]                    # Thêm [CLS] vào đầu câu
         firstSWindices.append(len(input_ids))

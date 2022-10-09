@@ -6,14 +6,26 @@ from model import BiaffineNER
 from dataloader import get_useful_ones, get_mask
 import os
 
-def get_pred_entity(input_tensor, label_set):
-    entity = []
-    for i in range(len(input_tensor)):
-        for j in range(i, len(input_tensor)):
-            if input_tensor[i][j] > 0:
-                tmp = (label_set[input_tensor[i][j].item()], i, j)
-                entity.append(tmp)
-    return entity
+def get_pred_entity(cate_pred, span_scores,label_set, is_flat_ner= True):
+    top_span = []
+#     cate_pred = np.array(cate_pred)
+    cate_pred_upper = torch.triu(cate_pred, diagonal=0)
+#     max_val = torch.max(cate_pred_upper)
+    index_item = torch.where(cate_pred_upper == 1)
+    row = index_item[0]
+    col = index_item[1]
+    for i, j in zip(row, col):
+        i = i.item()
+        j = j.item()
+        tmp = (label_set[cate_pred[i][j].item()], i, j,span_scores[i][j].item())
+        top_span.append(tmp)
+
+    top_span = sorted(top_span, reverse=True, key=lambda x: x[3])
+    
+    if not top_span:
+        top_span = [('ANSWER', 0, 0)]
+
+    return top_span[0]
 
 class Trainer(object):
     def __init__(self, args, train_dataset=None, dev_dataset=None, test_dataset=None):
@@ -128,7 +140,7 @@ class Trainer(object):
                     out = output[i][:true_len, :true_len]
                     
                     input_tensor, cate_pred = out.max(dim=-1)
-                    label_pre = get_pred_entity(cate_pred, self.label_set)
+                    label_pre = get_pred_entity(cate_pred, input_tensor, self.label_set, True)
                     print(label_pre)
         #             outputs.append(label_pre)
 
