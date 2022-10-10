@@ -22,7 +22,7 @@ def evaluate(predictions, mode):
     for i, sample in enumerate(list_sample):
         context = sample['context'].split(' ')
         question = sample['question'].split(' ')
-        sentence = ['cls'] + question + ['sep'] + context + ['sep']
+        sentence = ['cls'] + question + ['sep'] + context 
 
         labels = sample['label']
 

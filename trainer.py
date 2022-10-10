@@ -8,9 +8,7 @@ import os
 
 def get_pred_entity(cate_pred, span_scores,label_set, is_flat_ner= True):
     top_span = []
-#     cate_pred = np.array(cate_pred)
     cate_pred_upper = torch.triu(cate_pred, diagonal=0)
-#     max_val = torch.max(cate_pred_upper)
     index_item = torch.where(cate_pred_upper == 1)
     row = index_item[0]
     col = index_item[1]
@@ -122,7 +120,7 @@ class Trainer(object):
         self.model.eval()
         loss_func = torch.nn.CrossEntropyLoss(reduction='mean')
         eval_loss = 0
-        labels, outputs, seq_lengths = [], [], []
+        outputs = []
         for batch in eval_dataloader:
             batch = tuple(t.to(self.device) for t in batch)
 
@@ -142,24 +140,24 @@ class Trainer(object):
                     input_tensor, cate_pred = out.max(dim=-1)
                     label_pre = get_pred_entity(cate_pred, input_tensor, self.label_set, True)
                     print(label_pre)
-        #             outputs.append(label_pre)
+                    outputs.append(label_pre)
 
-        #     mask = get_mask(max_length=self.args.max_seq_length, seq_length=seq_length)
-        #     mask = mask.to(self.device)
+            mask = get_mask(max_length=self.args.max_seq_length, seq_length=seq_length)
+            mask = mask.to(self.device)
 
-        #     tmp_out, tmp_label = get_useful_ones(output, label, mask)
-        #     loss = loss_func(tmp_out, tmp_label)
-        #     eval_loss += loss.item()
+            tmp_out, tmp_label = get_useful_ones(output, label, mask)
+            loss = loss_func(tmp_out, tmp_label)
+            eval_loss += loss.item()
 
-        # exact_match, f1 = evaluate(outputs, mode)
+        exact_match, f1 = evaluate(outputs, mode)
 
-        # print()
-        # print(exact_match)
-        # print(f1)
+        print()
+        print(exact_match)
+        print(f1)
 
-        # if f1 > self.best_score:
-        #     self.save_model()
-        #     self.best_score = f1
+        if f1 > self.best_score:
+            self.save_model()
+            self.best_score = f1
 
     def save_model(self):
         checkpoint = {'model': self.model,
