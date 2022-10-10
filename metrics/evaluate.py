@@ -7,9 +7,9 @@ def evaluate(predictions, mode):
     list_sample = []
 
     if mode == 'dev':
-        path = './DataNew/dev_ViQuAD.json'
+        path = './data/dev_ViQuAD.json'
     elif mode == 'test':
-        path = './DataNew/test_ViQuAD.json'
+        path = './data/test_ViQuAD.json'
     else:
         raise Exception("Only dev and test dataset available")
         

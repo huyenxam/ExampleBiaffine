@@ -139,7 +139,7 @@ class Trainer(object):
                     
                     input_tensor, cate_pred = out.max(dim=-1)
                     label_pre = get_pred_entity(cate_pred, input_tensor, self.label_set, True)
-                    print(label_pre)
+                    # print(label_pre)
                     outputs.append(label_pre)
 
             mask = get_mask(max_length=self.args.max_seq_length, seq_length=seq_length)
