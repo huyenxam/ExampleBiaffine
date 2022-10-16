@@ -48,4 +48,4 @@ python train.py --train_path $TRAIN_PATH \
                 --label_set_path $LABEL_SET_PATH \
                 --do_eval \
                 --do_train \
-                --use_char \
+                # --use_char \
