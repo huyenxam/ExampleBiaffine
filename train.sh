@@ -5,7 +5,7 @@ export TEST_PATH="data/test_ViQuAD.json"
 export CHAR_VOCAB_PATH="data/charindex.json"
 export LABEL_SET_PATH="data/label_set.txt"
 export MAX_CHAR_LEN=20
-export MAX_SEQ_LENGTH=400
+export MAX_SEQ_LENGTH=420
 export BATCH_SIZE=2
 export CHAR_EMBEDDING_DIM=100
 export CHAR_HIDDEN_DIM=200
@@ -48,4 +48,4 @@ python train.py --train_path $TRAIN_PATH \
                 --label_set_path $LABEL_SET_PATH \
                 --do_eval \
                 --do_train \
-#                 --use_char \
+                --use_char \
