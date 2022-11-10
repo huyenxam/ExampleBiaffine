@@ -48,8 +48,8 @@ class InputSample(object):
                     end = self.max_seq_length - 1
 
                 if start >= self.max_seq_length - 1:
-                    start = 0
-                    end = 0
+                    start = len(question) + 2
+                    end = len(question) + 2
 
                 list_label.append(["ANSWER", start, end])
             

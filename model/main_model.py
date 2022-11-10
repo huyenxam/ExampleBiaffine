@@ -26,8 +26,13 @@ class BiaffineNER(nn.Module):
         x = self.word_rep(input_ids=input_ids, attention_mask=attention_mask,
                                       first_subword=first_subword,
                                       char_ids=char_ids)
+        # x = [bs, max_sep, 768 + char_hidden_dim*2]
         x, _ = self.bilstm(x)
+        # x = [bs, max_sep, hidden_dim]
         start = self.feedStart(x)
+        # start = [bs, max_sep, hidden_dim]
         end = self.feedEnd(x)
+        # end = [bs, max_sep, hidden_dim]
         score = self.biaffine(start, end)
+        # score = [bs, max_sep, max_sep, 2]
         return score
