@@ -26,3 +26,4 @@ class FeatureEmbedding(nn.Module):
         x = self.embedding(x)
         x = self.dropout(x)
         return x
+

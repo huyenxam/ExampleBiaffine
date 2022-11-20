@@ -22,13 +22,16 @@ def train(args):
 
     trainer = Trainer(args=args, train_dataset=train_dataset,
                       dev_dataset=dev_dataset, test_dataset=test_dataset)
-    if args.do_train:
-        trainer.train()
+    # if args.do_train:
+    #     trainer.load_model_train()
+    #     trainer.train()
 
     if args.do_eval:
-        trainer.load_model()
+        trainer.load_model_dev()
         print('Test Result:')
         trainer.eval("test")
+        print('Dev Result:')
+        trainer.eval("dev")
 
 
 if __name__ == '__main__':

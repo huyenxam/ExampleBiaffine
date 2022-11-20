@@ -9,7 +9,7 @@ export MAX_SEQ_LENGTH=400
 export BATCH_SIZE=2
 export CHAR_EMBEDDING_DIM=100
 export CHAR_HIDDEN_DIM=200
-export NUM_BERT_LAYER=3
+export NUM_BERT_LAYER=1
 export CHAR_VOCAB_SIZE=108
 export HIDDEN_DIM=728
 export HIDDEN_DIM_FFW=300
@@ -22,7 +22,6 @@ export WEIGHT_DECAY=0.01
 export WARMUP_STEPS=0
 export MAX_GRAD_NORM=1
 export SAVE_FOLDER="results"
-
 
 python train.py --train_path $TRAIN_PATH \
                 --max_char_len $MAX_CHAR_LEN  \
@@ -49,4 +48,4 @@ python train.py --train_path $TRAIN_PATH \
                 --label_set_path $LABEL_SET_PATH \
                 --do_eval \
                 --do_train \
-                # --use_char \
+#                 --use_char \

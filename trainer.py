@@ -8,18 +8,22 @@ import os
 
 def get_pred_entity(cate_pred, span_scores,label_set, is_flat_ner= True):
     top_span = []
-    for i in range(len(cate_pred)):
-        for j in range(i,len(cate_pred)):
-            if cate_pred[i][j] == 1:
-                tmp = (label_set[cate_pred[i][j].item()], i, j,span_scores[i][j].item())
-                top_span.append(tmp)
-    top_span = sorted(top_span, reverse=True, key=lambda x: x[3])
+    cate_pred_upper = torch.triu(cate_pred, diagonal=0)
+    index_item = torch.where(cate_pred_upper == 1)
+    row = index_item[0]
+    col = index_item[1]
+    for i, j in zip(row, col):
+        i = i.item()
+        j = j.item()
+        tmp = (label_set[cate_pred[i][j].item()], i, j,span_scores[i][j].item())
+        top_span.append(tmp)
 
+    top_span = sorted(top_span, reverse=True, key=lambda x: x[3])
+    
     if not top_span:
         top_span = [('ANSWER', 0, 0)]
 
     return top_span[0]
-
 
 class Trainer(object):
     def __init__(self, args, train_dataset=None, dev_dataset=None, test_dataset=None):
@@ -162,8 +166,14 @@ class Trainer(object):
         path = os.path.join(self.save_folder, 'checkpoint.pth')
         torch.save(checkpoint, path)
         torch.save(self.args, os.path.join(self.args.save_folder, 'training_args.bin'))
-
-    def load_model(self):
+        
+    def load_model_train(self):
+        path = os.path.join(self.save_folder, 'checkpoint.pth')
+        checkpoint = torch.load(path)
+        self.model = checkpoint['model']
+        self.model.load_state_dict(checkpoint['state_dict'])
+    
+    def load_model_dev(self):
         path = os.path.join(self.save_folder, 'checkpoint.pth')
         checkpoint = torch.load(path)
         self.model = checkpoint['model']
