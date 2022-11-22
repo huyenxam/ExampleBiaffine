@@ -10,6 +10,8 @@ def evaluate(predictions, mode):
         path = './data/dev_ViQuAD.json'
     elif mode == 'test':
         path = './data/test_ViQuAD.json'
+    elif mode == 'test':
+        path = './data/train_ViQuAD.json'
     else:
         raise Exception("Only dev and test dataset available")
         

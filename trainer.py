@@ -1,7 +1,7 @@
 from metrics.evaluate import *
 import torch
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
-from transformers import AdamW, get_linear_schedule_with_warmup
+from transformers import SGD, get_linear_schedule_with_warmup
 from model import BiaffineNER
 from dataloader import get_useful_ones, get_mask
 import os
@@ -52,7 +52,7 @@ class Trainer(object):
             {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)],
              'weight_decay_rate': 0.0}
         ]
-        optimizer = AdamW(
+        optimizer = SGD(
             optimizer_grouped_parameters,
             lr=self.args.learning_rate,
             eps=self.args.adam_epsilon
@@ -69,6 +69,7 @@ class Trainer(object):
             train_loss = 0
             print('EPOCH:', epoch)
             self.model.train()
+            outputs = []
             for step, batch in enumerate(train_dataloader):
                 batch = tuple(t.to(self.device) for t in batch)
 
@@ -83,6 +84,16 @@ class Trainer(object):
 
                 output = self.model(**inputs)
                 optimizer.zero_grad()
+
+                for i in range(len(output)):
+                    true_len = seq_length[i]
+                    out = output[i][:true_len, :true_len]
+                    
+                    input_tensor, cate_pred = out.max(dim=-1)
+                    label_pre = get_pred_entity(cate_pred, input_tensor, self.label_set, True)
+                    # print(label_pre)
+                    outputs.append(label_pre)
+
                 mask = get_mask(max_length=self.args.max_seq_length, seq_length=seq_length)
                 mask = mask.to(self.device)
                 tmp_out, tmp_label = get_useful_ones(output, label, mask)
@@ -99,6 +110,12 @@ class Trainer(object):
                 # update learning rate
                 scheduler.step()
             print('train loss:', train_loss / len(train_dataloader))
+
+            exact_match, f1 = evaluate(outputs, mode="train")
+
+            print()
+            print(exact_match)
+            print(f1)
             self.eval('dev')
 
     def eval(self, mode):
