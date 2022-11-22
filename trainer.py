@@ -1,7 +1,7 @@
 from metrics.evaluate import *
 import torch
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
-from transformers import SGD, get_linear_schedule_with_warmup
+from transformers import AdamW, get_linear_schedule_with_warmup
 from model import BiaffineNER
 from dataloader import get_useful_ones, get_mask
 import os
@@ -52,7 +52,7 @@ class Trainer(object):
             {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)],
              'weight_decay_rate': 0.0}
         ]
-        optimizer = SGD(
+        optimizer = AdamW(
             optimizer_grouped_parameters,
             lr=self.args.learning_rate,
             eps=self.args.adam_epsilon
