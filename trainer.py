@@ -5,6 +5,7 @@ from transformers import AdamW, get_linear_schedule_with_warmup
 from model import BiaffineNER
 from dataloader import get_useful_ones, get_mask
 import os
+import matplotlib.pyplot as plt
 
 
 def get_pred_entity(cate_pred, span_scores,label_set, is_flat_ner= True):
@@ -69,7 +70,6 @@ class Trainer(object):
             train_loss = 0
             print('EPOCH:', epoch)
             self.model.train()
-            outputs = []
             for step, batch in enumerate(train_dataloader):
                 batch = tuple(t.to(self.device) for t in batch)
 
@@ -84,15 +84,6 @@ class Trainer(object):
 
                 output = self.model(**inputs)
                 optimizer.zero_grad()
-
-                for i in range(len(output)):
-                    true_len = seq_length[i]
-                    out = output[i][:true_len, :true_len]
-                    
-                    input_tensor, cate_pred = out.max(dim=-1)
-                    label_pre = get_pred_entity(cate_pred, input_tensor, self.label_set, True)
-                    # print(label_pre)
-                    outputs.append(label_pre)
 
                 mask = get_mask(max_length=self.args.max_seq_length, seq_length=seq_length)
                 mask = mask.to(self.device)
@@ -110,12 +101,6 @@ class Trainer(object):
                 # update learning rate
                 scheduler.step()
             print('train loss:', train_loss / len(train_dataloader))
-
-            exact_match, f1 = evaluate(outputs, mode="train")
-
-            print()
-            print(exact_match)
-            print(f1)
             self.eval('dev')
 
     def eval(self, mode):
@@ -164,9 +149,10 @@ class Trainer(object):
 
         exact_match, f1 = evaluate(outputs, mode)
 
-        print()
+        print(mode)
         print(exact_match)
         print(f1)
+        print('Loss:', eval_loss / len(eval_dataloader))
 
         if f1 > self.best_score:
             self.save_model()
@@ -185,3 +171,14 @@ class Trainer(object):
         checkpoint = torch.load(path)
         self.model = checkpoint['model']
         self.model.load_state_dict(checkpoint['state_dict'])
+    
+
+    # def plot(self, loss_train, loss_val):
+    #     epochs = self.args.num_epochs
+    #     plt.plot(epochs, loss_train, 'g', label='Training loss')
+    #     plt.plot(epochs, loss_val, 'b', label='validation loss')
+    #     plt.title('Training and Validation loss')
+    #     plt.xlabel('Epochs')
+    #     plt.ylabel('Loss')
+    #     plt.legend()
+    #     plt.show()
